@@ -9,6 +9,7 @@ Source0:    	%{name}-%{version}.tar.gz
 Provides:       libipfs-devel = %{name}%{version}
 Obsoletes:      libipfs < %{name}%{version}
 BuildRequires:  git
+BuildRequires:  tar
 ExclusiveArch:  %ix86 x86_64 %arm
 
 %description
