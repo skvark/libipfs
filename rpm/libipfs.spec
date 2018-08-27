@@ -25,8 +25,8 @@ go get -u -d github.com/ipfs/go-ipfs
 cd $HOME/go/src/github.com/ipfs/go-ipfs
 make deps
 cd $HOME/libipfs/src
-ls /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/armv7hl-meego-linux-gnueabi/lib/
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/armv7hl-meego-linux-gnueabi/lib/
+ls /srv/mer/toolings/SailfishOS-2.2.0.29/usr/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/srv/mer/toolings/SailfishOS-2.2.0.29/usr/lib
 CC=/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc GOOS=linux GOARCH=arm CGO_ENABLED=1 go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
 
 %install
