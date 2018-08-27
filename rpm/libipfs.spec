@@ -4,36 +4,33 @@ Release:        0
 Summary:        C wrapper for go-ipfs
 License:        MIT
 Group:          Development/Libraries
-URL:        	https://github.com/skvark
+URL:        	https://github.com/skvark/libipfs
 Source0:    	%{name}-%{version}.tar.gz
 Provides:       libipfs-devel = %{name}%{version}
 Obsoletes:      libipfs < %{name}%{version}
-BuildRequires:  go >= 1.11
 BuildRequires:  git
-BuildRequires:  iputils
 ExclusiveArch:  %ix86 x86_64 %arm
 
 %description
 Simple C wrapper for go-ipfs.
 
 %prep
-
-%setup -q -n %{name}
+%setup -q -n %{name}-%{version}
 
 %build
 export PATH=$PATH:/usr/local/go/bin
 go get -u -d github.com/ipfs/go-ipfs
 cd $GOPATH/src/github.com/ipfs/go-ipfs
 make deps
-cd %{buildroot}
+cd %{buildroot}/src
 go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
 
 %install
 rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_libdir}/
 mkdir -p %{buildroot}%{_includedir}/
-cp libipfs.so %{buildroot}%{_libdir}/libipfs.so
-cp libipfs.h %{buildroot}%{_includedir}/libipfs.h
+cp src/libipfs.so %{buildroot}%{_libdir}/libipfs.so
+cp src/libipfs.h %{buildroot}%{_includedir}/libipfs.h
 
 %clean
 rm -rf %{buildroot}
