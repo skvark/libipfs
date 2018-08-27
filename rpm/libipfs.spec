@@ -20,16 +20,13 @@ Simple C wrapper for go-ipfs.
 %setup -q -n %{name}-%{version}
 
 %build
-ls /srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/local/go/bin
 export PATH=$PATH:/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/local/go/bin
 go get -u -d github.com/ipfs/go-ipfs
-ls $HOME
 cd $HOME/go/src/github.com/ipfs/go-ipfs
-go version
 make deps
 cd $HOME/libipfs/src
-ls /srv/mer/toolings/SailfishOS-2.2.0.29-armv7hl/usr/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/srv/mer/toolings/SailfishOS-2.2.0.29-armv7hl/usr/lib
+ls /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/armv7hl-meego-linux-gnueabi/lib/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/armv7hl-meego-linux-gnueabi/lib/
 CC=/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc GOOS=linux GOARCH=arm CGO_ENABLED=1 go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
 
 %install
