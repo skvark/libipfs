@@ -20,7 +20,8 @@ Simple C wrapper for go-ipfs.
 %setup -q -n %{name}-%{version}
 
 %build
-export PATH=$PATH:/usr/local/go/bin
+ls /srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/local/go/bin
+export PATH=$PATH:/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/local/go/bin
 go get -u -d github.com/ipfs/go-ipfs
 ls $HOME
 cd $HOME/go/src/github.com/ipfs/go-ipfs
