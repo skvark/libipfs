@@ -27,7 +27,7 @@ make deps
 cd $HOME/libipfs/src
 ls /srv/mer/toolings/SailfishOS-2.2.0.29/usr/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/srv/mer/toolings/SailfishOS-2.2.0.29/usr/lib
-CC=/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc GOOS=linux GOARCH=arm CGO_ENABLED=1 CPATH=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/include go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
+CC=/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS_ALLOW=.* CGO_CXXFLAGS_ALLOW=.* CGO_LDFLAGS_ALLOW=.* CPATH=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/include go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
 
 %install
 rm -rf %{buildroot}
