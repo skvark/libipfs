@@ -24,7 +24,7 @@ export PATH=$PATH:/usr/local/go/bin
 go get -u -d github.com/ipfs/go-ipfs
 ls $HOME
 cd $HOME/go/src/github.com/ipfs/go-ipfs
-go --version
+go version
 make deps
 cd %{buildroot}/src
 go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
