@@ -20,7 +20,8 @@ Simple C wrapper for go-ipfs.
 %build
 export PATH=$PATH:/usr/local/go/bin
 go get -u -d github.com/ipfs/go-ipfs
-cd /home/go/src/github.com/ipfs/go-ipfs
+ls $HOME
+cd $HOME/go/src/github.com/ipfs/go-ipfs
 make deps
 cd %{buildroot}/src
 go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
