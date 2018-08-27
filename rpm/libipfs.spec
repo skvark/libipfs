@@ -11,6 +11,7 @@ Obsoletes:      libipfs < %{name}%{version}
 BuildRequires:  git
 BuildRequires:  tar
 BuildRequires:  go
+BuildRequires:  libmpc
 ExclusiveArch:  %ix86 x86_64 %arm
 
 %description
@@ -28,8 +29,7 @@ cd $HOME/go/src/github.com/ipfs/go-ipfs
 go version
 make deps
 cd $HOME/libipfs/src
-which gcc
-GOOS=linux GOARCH=arm64 CGO_ENABLED=1 go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
+CC=/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc GOOS=linux GOARCH=arm CGO_ENABLED=1 go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
 
 %install
 rm -rf %{buildroot}
