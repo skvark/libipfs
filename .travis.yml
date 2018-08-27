@@ -10,7 +10,7 @@ before_install:
   - docker pull coderus/sailfishos-platform-sdk:2.2.0.29
   - docker run -it --mount type=bind,source="$(pwd)",target=/home/nemo/libipfs -d --name build-engine coderus/sailfishos-platform-sdk:2.2.0.29 /bin/bash
   - docker exec build-engine sb2 -t SailfishOS-2.2.0.29-armv7hl -m sdk-install -R zypper --non-interactive --no-gpg-checks ar -f http://repo.merproject.org/obs/home:/skvark/sailfish_latest_armv7hl go
-  - docker exec build-engine sb2 -t SailfishOS-2.2.0.29-armv7hl -m sdk-install -R zypper --non-interactive ref
+  - docker exec build-engine sb2 -t SailfishOS-2.2.0.29-armv7hl -m sdk-install -R zypper --non-interactive --no-gpg-checks ref
   - docker exec build-engine sb2 -t SailfishOS-2.2.0.29-armv7hl -m sdk-install -R zypper --non-interactive in go
   - docker exec build-engine ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
