@@ -28,7 +28,9 @@ cd $HOME/go/src/github.com/ipfs/go-ipfs
 go version
 make deps
 cd $HOME/libipfs/src
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib CC=/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc GOOS=linux GOARCH=arm CGO_ENABLED=1 go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
+ls /usr/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib
+CC=/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc GOOS=linux GOARCH=arm CGO_ENABLED=1 go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
 
 %install
 rm -rf %{buildroot}
