@@ -32,7 +32,10 @@ cd $HOME/libipfs/src
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/srv/mer/toolings/SailfishOS-2.2.0.29/usr/lib
 export CC=/srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc
 export CXX=/srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-g++
-export GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS_ALLOW=.*
+export GOOS=linux
+export GOARCH=arm GOARM=7
+export CGO_ENABLED=1
+export CGO_CFLAGS_ALLOW=.*
 export CGO_CXXFLAGS_ALLOW=.*
 export CGO_LDFLAGS_ALLOW=.*
 export CPATH=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/include
