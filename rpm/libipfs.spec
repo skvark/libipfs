@@ -20,14 +20,25 @@ Simple C wrapper for go-ipfs.
 %setup -q -n %{name}-%{version}
 
 %build
+
 export PATH=$PATH:/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/local/go/bin
+
 go get -u -d github.com/ipfs/go-ipfs
 cd $HOME/go/src/github.com/ipfs/go-ipfs
 make deps
+
 cd $HOME/libipfs/src
-ls /srv/mer/toolings/SailfishOS-2.2.0.29/usr/lib
+
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/srv/mer/toolings/SailfishOS-2.2.0.29/usr/lib
-CC=/srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS_ALLOW=.* CGO_CXXFLAGS_ALLOW=.* CGO_LDFLAGS_ALLOW=.* CPATH=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/include go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
+export CC=/srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc
+export CXX=/srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-g++
+export GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CGO_CFLAGS_ALLOW=.*
+export CGO_CXXFLAGS_ALLOW=.*
+export CGO_LDFLAGS_ALLOW=.*
+export CPATH=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/include
+export CGO_LDFLAGS=--sysroot=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/
+
+go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
 
 %install
 rm -rf %{buildroot}
