@@ -28,7 +28,8 @@ cd $HOME/go/src/github.com/ipfs/go-ipfs
 go version
 make deps
 cd $HOME/libipfs/src
-CC=/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc GOOS=linux GOARCH=arm64 CGO_ENABLED=1 go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
+which gcc
+GOOS=linux GOARCH=arm64 CGO_ENABLED=1 go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
 
 %install
 rm -rf %{buildroot}
