@@ -40,9 +40,13 @@ export CGO_CFLAGS_ALLOW=.*
 export CGO_CXXFLAGS_ALLOW=.*
 export CGO_LDFLAGS_ALLOW=.*
 export CPATH=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/include
+export LIBRARY_PATH=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/lib
 export CGO_LDFLAGS=--sysroot=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/
 
-go build -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
+ln -s /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-as /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/libexec/gcc/armv7hl-meego-linux-gnueabi/4.8.3/as
+ln -s /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-ld /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/libexec/gcc/armv7hl-meego-linux-gnueabi/4.8.3/ld
+
+go build -x -v -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
 
 %install
 rm -rf %{buildroot}
