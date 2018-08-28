@@ -19,4 +19,12 @@ script:
     && cd libipfs
     && sudo ln -s /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-as /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/libexec/gcc/armv7hl-meego-linux-gnueabi/4.8.3/as
     && sudo ln -s /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-ld /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/libexec/gcc/armv7hl-meego-linux-gnueabi/4.8.3/ld
-    && mb2 -t SailfishOS-2.2.0.29-armv7hl build"
+    && mb2 -t SailfishOS-2.2.0.29-armv7hl build
+    && cp RPMS/*.rpm /home/nemo/libipfs-git/"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: OPfewpDqgMBcXpXWcQY7plkyhkpQiDSShEqX5Yny32EMB8u8a/LKn/X33TGJUKdYzXQH/bfAwDOhNO+yRXFAZkUIn45zU0LjOpbqxcBJH5ZyTHLerT3O6xUKFGR8od1VTT/XfRcD/jztbHePpXosvJGSMGbvDIVc4guq17GaqoHRIDTSU5RiyVD7bPO+fdkPBQtmpJYR7GCfsSISXnty40ou0pKzTJn2eiC3cZcNtgbFGihJ7M9aCgyL8ZBL55RudVyUf9HgjiPYteRuPtXP6uC2avwjAHwZ23xQFqmsWln6Q2MpFr3KMG5Ij6dojJmfP1gMIW2Uq1KasXdBFS6QDpklhoYwwhuX28GtWsxCCkNUTAkF3lQ+sdHdVude+wt6Stpa+TcXN/FHQ44lIEf92ED9G+vbjR+Yzk4ZcpTCLlYTC74ABSjWLUgnoVKWAlGM3OLNL8iXjJwy1ETEDpVIxMapfcETK2Mu+2I6JPGSW6+dUyyQk19TNkou5zFem84DcYN1iBLr8MiyJhmf5xY7rSHG0Fr4iF6s4O3DsztsWgdUHEqhgtf9q5YC/rFl3MuzGdRDz0IDQOTFF0Yqff8A8wpCOo/emhQDNSbzaRAhSm05gE9SCsefhdtaiWHzi2aX8x6i2iezoKOx7n/VMWw4lRvDQC75vyMj5iJ5aTWInB4=
+  file: *.rpm
+  skip_cleanup: true
