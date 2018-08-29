@@ -5,6 +5,7 @@
 #include "libipfs.h"
 
 int added = -1;
+int path_added = -1;
 
 void file_added(char* error, char* data, size_t size) {
     if (data != NULL) {
@@ -17,9 +18,21 @@ void file_added(char* error, char* data, size_t size) {
         free(error);
         added = 1;
     }
-
-    ipfs_stop();
     added = 0;
+}
+
+void file_path_added(char* error, char* data, size_t size) {
+    if (data != NULL) {
+        fprintf(stdout, "hash (msf root): %s\n", data);
+        free(data);
+    }
+
+    if (error != NULL) {
+        fprintf(stderr, "error: %s\n", error);
+        free(error);
+        path_added = 1;
+    }
+    path_added = 0;
 }
 
 int main(int argc, char **argv) {
@@ -41,11 +54,15 @@ int main(int argc, char **argv) {
     }
 
     char data[] = "content for ipfs wrapper test";
+    char pathname[] = "test/test.txt";
 
-    ipfs_add((void*)data, sizeof(data), (void*)&file_added);
+    ipfs_add_bytes((void*)data, sizeof(data), (void*)&file_added);
+    ipfs_add_path_or_file((char*)pathname, (void*)&file_path_added);
 
-    while(added == -1) {};
+    while(added == -1 || path_added == -1) {};
 
-    return added;
+    ipfs_stop();
+
+    return added && path_added;
 }
 
