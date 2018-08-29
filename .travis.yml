@@ -19,7 +19,7 @@ script:
     && cd libipfs
     && sudo ln -s /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-as /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/libexec/gcc/armv7hl-meego-linux-gnueabi/4.8.3/as
     && sudo ln -s /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-ld /srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/libexec/gcc/armv7hl-meego-linux-gnueabi/4.8.3/ld
-    && mb2 -t SailfishOS-2.2.0.29-armv7hl build"
+    && mb2 -t SailfishOS-2.2.0.29-armv7hl build
     && sudo cp RPMS/*.rpm /home/nemo/libipfs-git/"
 
 deploy:
