@@ -36,7 +36,8 @@ Simple C wrapper for go-ipfs.
 
 %build
 
-export PATH=/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/usr/local/go/bin:$PATH
+export GOROOT=/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/usr/local/go
+export PATH=$GOROOT/bin:$PATH
 
 go env
 go get -u -d github.com/ipfs/go-ipfs
