@@ -17,20 +17,20 @@ matrix:
 
 before_install:
   - ls
-  - docker pull coderus/sailfishos-platform-sdk:${SFOS_VERSION}
-  - docker run -it --mount type=bind,source="$(pwd)",target=/home/nemo/libipfs-git -d --name build-engine coderus/sailfishos-platform-sdk:${SFOS_VERSION} /bin/bash
-  - docker exec build-engine sb2 -t SailfishOS-${SFOS_VERSION}-${TARGET} -m sdk-install -R zypper --non-interactive --no-gpg-checks ar -f http://repo.merproject.org/obs/home:/skvark/sailfish_latest_${TARGET} go
-  - docker exec build-engine sb2 -t SailfishOS-${SFOS_VERSION}-${TARGET} -m sdk-install -R zypper --non-interactive --no-gpg-checks ref
-  - docker exec build-engine ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+  - docker pull 'coderus/sailfishos-platform-sdk:${SFOS_VERSION}'
+  - docker run -it --mount type=bind,source="$(pwd)",target=/home/nemo/libipfs-git -d --name build-engine 'coderus/sailfishos-platform-sdk:${SFOS_VERSION}' /bin/bash
+  - docker exec 'build-engine sb2 -t SailfishOS-${SFOS_VERSION}-${TARGET} -m sdk-install -R zypper --non-interactive --no-gpg-checks ar -f http://repo.merproject.org/obs/home:/skvark/sailfish_latest_${TARGET} go'
+  - docker exec 'build-engine sb2 -t SailfishOS-${SFOS_VERSION}-${TARGET} -m sdk-install -R zypper --non-interactive --no-gpg-checks ref'
+  - docker exec 'build-engine ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts'
 
 script:
-  - docker exec build-engine bash -e SFOS_VERSION=${SFOS_VERSION} -e TARGET=${TARGET} -c "cd /home/nemo
+  - docker exec 'build-engine bash -e SFOS_VERSION=${SFOS_VERSION} -e TARGET=${TARGET} -c "cd /home/nemo
     && cp -r libipfs-git libipfs
     && cd libipfs
     && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-gnueabi-as /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-gnueabi/4.8.3/as
     && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-gnueabi-ld /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-gnueabi/4.8.3/ld
     && mb2 -t SailfishOS-${SFOS_VERSION}-${TARGET} build
-    && sudo cp RPMS/*.rpm /home/nemo/libipfs-git/"
+    && sudo cp RPMS/*.rpm /home/nemo/libipfs-git/"'
 
 deploy:
   provider: releases
