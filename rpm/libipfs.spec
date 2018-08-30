@@ -36,8 +36,13 @@ Simple C wrapper for go-ipfs.
 
 %build
 
+%if "%{_goarch}" == arm
 export GOROOT=/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/usr/local/go
-export PATH=$GOROOT/bin:$PATH
+%else
+export GOROOT=/usr/local/go
+%endif
+
+export PATH=$PATH:$GOROOT/bin
 
 go env
 go get -u -d github.com/ipfs/go-ipfs
