@@ -20,6 +20,7 @@ Simple C wrapper for go-ipfs.
 
 %define _sfos_version %{getenv:SFOS_VERSION}
 %define _target %{getenv:TARGET}
+%define _abi %{getenv:ABI}
 
 %ifarch %ix86
 # 386 (a.k.a. x86 or x86-32)
@@ -44,8 +45,8 @@ make deps
 cd $HOME/libipfs/src
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/srv/mer/toolings/SailfishOS-%{_sfos_version}/usr/lib
-export CC=/srv/mer/toolings/SailfishOS-%{_sfos_version}/opt/cross/bin/%{_target}-meego-linux-gnueabi-gcc
-export CXX=/srv/mer/toolings/SailfishOS-%{_sfos_version}/opt/cross/bin/%{_target}-meego-linux-gnueabi-g++
+export CC=/srv/mer/toolings/SailfishOS-%{_sfos_version}/opt/cross/bin/%{_target}-meego-linux-%{_abi}-gcc
+export CXX=/srv/mer/toolings/SailfishOS-%{_sfos_version}/opt/cross/bin/%{_target}-meego-linux-%{_abi}-g++
 export GOOS=linux
 export GOARCH=%{_goarch}
 
