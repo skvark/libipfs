@@ -16,7 +16,7 @@ matrix:
       - TARGET=armv7hl
   - name: "i486"
     env:
-      - TARGET=i486
+      - TARGET=latest_i486
 
 before_install:
   - ls
