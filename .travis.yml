@@ -13,11 +13,11 @@ matrix:
   include:
   - name: "armv7hl"
     env:
-      - TARGET_PREFIX=sailfishos_latest_
+      - TARGET_PREFIX=sailfish_latest_
       - TARGET=armv7hl
   - name: "i486"
     env:
-      - TARGET_PREFIX=sailfish_latest_latest_
+      - TARGET_PREFIX=sailfishos_latest_latest_
       - TARGET=i486
 
 before_install:
