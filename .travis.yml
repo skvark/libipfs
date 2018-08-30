@@ -13,18 +13,18 @@ matrix:
   include:
   - name: "armv7hl"
     env:
-      - TARGET_PREFIX=_latest_
+      - TARGET_PREFIX=sailfishos_latest_
       - TARGET=armv7hl
   - name: "i486"
     env:
-      - TARGET_PREFIX=_latest_latest_
+      - TARGET_PREFIX=sailfish_latest_latest_
       - TARGET=i486
 
 before_install:
   - ls
   - docker pull $IMAGE
   - docker run -it --mount type=bind,source="$(pwd)",target=/home/nemo/libipfs-git -d --name build-engine coderus/sailfishos-platform-sdk:$SFOS_VERSION /bin/bash
-  - docker exec build-engine sb2 -t SailfishOS-$SFOS_VERSION-$TARGET -m sdk-install -R zypper --non-interactive --no-gpg-checks ar -f http://repo.merproject.org/obs/home:/skvark/sailfish${TARGET_PREFIX}${TARGET} go
+  - docker exec build-engine sb2 -t SailfishOS-$SFOS_VERSION-$TARGET -m sdk-install -R zypper --non-interactive --no-gpg-checks ar -f http://repo.merproject.org/obs/home:/skvark/${TARGET_PREFIX}${TARGET} go
   - docker exec build-engine sb2 -t SailfishOS-$SFOS_VERSION-$TARGET -m sdk-install -R zypper --non-interactive --no-gpg-checks ref
   - docker exec build-engine ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 

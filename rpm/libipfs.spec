@@ -17,10 +17,9 @@ ExclusiveArch:  %ix86 x86_64 %arm
 Simple C wrapper for go-ipfs.
 
 %prep
-%_sfos_version %{getenv:SFOS_VERSION}
-%_target %{getenv:TARGET}
 
-echo %{_sfos_version} %{_target}
+%define _sfos_version %{getenv:SFOS_VERSION}
+%define _target %{getenv:TARGET}
 
 %ifarch %ix86
 # 386 (a.k.a. x86 or x86-32)
