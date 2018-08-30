@@ -38,6 +38,8 @@ Simple C wrapper for go-ipfs.
 
 %if "%{_goarch}" == arm
 export PATH=$PATH:/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/usr/local/go/bin
+%else
+export PATH=$PATH:/usr/local/go/bin
 %endif
 
 go get -u -d github.com/ipfs/go-ipfs
