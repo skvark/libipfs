@@ -54,6 +54,8 @@ export GOARCH=%{_goarch}
 
 %if "%{_goarch}" == arm
 export GOARM=7
+%else
+export GO386=sse2
 %endif
 
 export CGO_ENABLED=1
