@@ -64,7 +64,7 @@ export CPATH=/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/usr/include
 export LIBRARY_PATH=/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/usr/lib
 export CGO_LDFLAGS=--sysroot=/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/
 
-go build -x -v -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
+go build -x -v -o -ldflags=all="-s -w" libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
 
 %install
 rm -rf %{buildroot}
