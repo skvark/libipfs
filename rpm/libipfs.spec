@@ -17,11 +17,24 @@ ExclusiveArch:  %ix86 x86_64 %arm
 Simple C wrapper for go-ipfs.
 
 %prep
+%_sfos_version %{getenv:SFOS_VERSION}
+%_target %{getenv:TARGET}
+
+%ifarch %ix86
+# 386 (a.k.a. x86 or x86-32)
+%define _goarch 386
+%endif
+
+%ifarch %arm
+# arm (a.k.a. ARM)
+%define _goarch arm
+%endif
+
 %setup -q -n %{name}-%{version}
 
 %build
 
-export PATH=$PATH:/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/local/go/bin
+export PATH=$PATH:/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/usr/local/go/bin
 
 go get -u -d github.com/ipfs/go-ipfs
 cd $HOME/go/src/github.com/ipfs/go-ipfs
@@ -29,19 +42,23 @@ make deps
 
 cd $HOME/libipfs/src
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/srv/mer/toolings/SailfishOS-2.2.0.29/usr/lib
-export CC=/srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-gcc
-export CXX=/srv/mer/toolings/SailfishOS-2.2.0.29/opt/cross/bin/armv7hl-meego-linux-gnueabi-g++
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/srv/mer/toolings/SailfishOS-%{_sfos_version}/usr/lib
+export CC=/srv/mer/toolings/SailfishOS-%{_sfos_version}/opt/cross/bin/%{_target}-meego-linux-gnueabi-gcc
+export CXX=/srv/mer/toolings/SailfishOS-%{_sfos_version}/opt/cross/bin/%{_target}-meego-linux-gnueabi-g++
 export GOOS=linux
-export GOARCH=arm
+export GOARCH=%{_goarch}
+
+%if "%{_goarch}" == arm
 export GOARM=7
+%endif
+
 export CGO_ENABLED=1
 export CGO_CFLAGS_ALLOW=.*
 export CGO_CXXFLAGS_ALLOW=.*
 export CGO_LDFLAGS_ALLOW=.*
-export CPATH=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/include
-export LIBRARY_PATH=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/usr/lib
-export CGO_LDFLAGS=--sysroot=/srv/mer/targets/SailfishOS-2.2.0.29-armv7hl/
+export CPATH=/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/usr/include
+export LIBRARY_PATH=/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/usr/lib
+export CGO_LDFLAGS=--sysroot=/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/
 
 go build -x -v -o libipfs.so -buildmode=c-shared go_ipfs_wrapper.go
 
