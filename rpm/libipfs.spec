@@ -20,6 +20,8 @@ Simple C wrapper for go-ipfs.
 %_sfos_version %{getenv:SFOS_VERSION}
 %_target %{getenv:TARGET}
 
+echo %{_sfos_version} %{_target}
+
 %ifarch %ix86
 # 386 (a.k.a. x86 or x86-32)
 %define _goarch 386
