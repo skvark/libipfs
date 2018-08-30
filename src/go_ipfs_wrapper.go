@@ -13,9 +13,9 @@ import (
 	coreiface "github.com/ipfs/go-ipfs/core/coreapi/interface"
 	coreunix "github.com/ipfs/go-ipfs/core/coreunix"
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
-	commands "github.com/ipfs/go-ipfs/core/commands"
 	"gx/ipfs/QmPTfgFTo9PFr1PvPKyKoeMgBvYPh6cX3aDP7DHKVbnCbi/go-ipfs-cmds/cli"
 	"gx/ipfs/QmTyiSs9VgdVb4pnzdjtKhcfdTkHFEaNn6xnCbZq4DTFRt/go-ipfs-config"
+	commands "github.com/ipfs/go-ipfs/core/commands"
 )
 
 //#include <stdlib.h>
