@@ -24,7 +24,7 @@ While the primary target of this repository is Sailfish OS, the wrapper can be b
 2. Fetch [go-ipfs](https://github.com/ipfs/go-ipfs) sources according to the guide in the ``go-ipfs`` README and run ``make deps`` in the source folder.
 3. Run ``CGO_ENABLED=1 go build -o libipfs.so -buildmode=c-shared src/go_ipfs_wrapper.go``
 
-You might want to set GOOS and GOARCH environment variables if you are targeting some other OS and architecture than your system (cross-compilation). However, this requires the target system toolchain (compilers, linkers etc.) to work properly. For example see the ``rpm/libipfs.spec`` file.
+You might want to set GOOS and GOARCH environment variables if you are targeting some other OS and architecture than your host system (cross-compilation). However, this requires the target system toolchain (compilers, linkers etc.) to work properly. For example see the ``rpm/libipfs.spec`` file.
 
 ## Documentation for go-ipfs Wrapper
 
