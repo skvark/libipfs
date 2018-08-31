@@ -31,8 +31,6 @@ before_install:
 script:
   - docker exec -e SFOS_VERSION=${SFOS_VERSION} -e TARGET=$TARGET -e ABI=$ABI build-engine bash -c "cd /home/nemo
     && cp -r libipfs-git libipfs
-    && curl -O https://storage.googleapis.com/golang/go1.11.linux-386.tar.gz
-    && sudo tar -xzf go1.11.linux-386.tar.gz -C /usr/local
     && cd libipfs
     && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-${ABI}-as /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-${ABI}/4.8.3/as
     && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-${ABI}-ld /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-${ABI}/4.8.3/ld
