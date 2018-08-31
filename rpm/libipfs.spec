@@ -35,10 +35,6 @@ Simple C wrapper for go-ipfs.
 
 %build
 
-GO=go1.11.linux-386.tar.gz && curl -sL --retry 10 --retry-delay 10 -O https://storage.googleapis.com/golang/$GO && tar -xzf $GO -C /usr/local
-export GOROOT=/usr/local/go
-export PATH=$PATH:$GOROOT/bin
-
 go env
 go get -u -d github.com/ipfs/go-ipfs
 cd $HOME/go/src/github.com/ipfs/go-ipfs
