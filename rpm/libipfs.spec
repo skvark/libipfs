@@ -35,6 +35,12 @@ Simple C wrapper for go-ipfs.
 
 %build
 
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin
+
+echo $PATH
+ls -la /usr/local/go/bin
+
 go env
 go get -u -d github.com/ipfs/go-ipfs
 cd $HOME/go/src/github.com/ipfs/go-ipfs
