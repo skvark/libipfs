@@ -36,7 +36,8 @@ Simple C wrapper for go-ipfs.
 
 %build
 
-export GOROOT=/srv/mer/targets/SailfishOS-%{_sfos_version}-%{_target}/usr/local/go
+GO=go1.11.linux-386.tar.gz && curl -sL --retry 10 --retry-delay 10 -O https://storage.googleapis.com/golang/$GO && tar -xzf $GO -C /usr/local
+export GOROOT=/usr/local/go
 export PATH=$PATH:$GOROOT/bin
 
 go env
@@ -58,6 +59,8 @@ export GOARM=7
 export GO386=sse2
 %endif
 
+export GOHOSTOS=linux
+export GOHOSTARCH=386
 export CGO_ENABLED=1
 export CGO_CFLAGS_ALLOW=.*
 export CGO_CXXFLAGS_ALLOW=.*
