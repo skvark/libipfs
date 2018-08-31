@@ -14,7 +14,7 @@ RPM packages are built on Travis with the help of [SailfishOS SDK Docker image](
 
 The ``.spec`` file and packaging setup are somewhat unusual because ``go-ipfs`` and the wrapper library have to be cross-compiled with ``cgo`` for ARM platform with Sailfish OS SDK toolchains. Please see the ``.spec`` file and ``.travis.yml`` for the changes which have been made to be able to execute the build process successfully.
 
-The ``go`` compiler is installed to the build environment via [Mer OBS](https://build.merproject.org/package/show/home:skvark/go).
+The ``go`` compiler is installed to the build environment during build.
 
 #### Manual builds in other systems
 
