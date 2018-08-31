@@ -26,7 +26,7 @@ before_install:
   - ls
   - docker pull $IMAGE
   - docker run -it --mount type=bind,source="$(pwd)",target=/home/nemo/libipfs-git -d --name build-engine coderus/sailfishos-platform-sdk:$SFOS_VERSION /bin/bash
-  - docker exec build-engine bash -c "curl -O https://storage.googleapis.com/golang/go1.11.linux-386.tar.gz && tar -xzf go1.11.linux-386.tar.gz -C /usr/local"
+  - docker exec build-engine bash -c "sudo curl -O https://storage.googleapis.com/golang/go1.11.linux-386.tar.gz && tar -xzf go1.11.linux-386.tar.gz -C /usr/local"
   - docker exec build-engine bash -c "export GOROOT=/usr/local/go && export PATH=$PATH:$GOROOT/bin"
   - docker exec build-engine ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
