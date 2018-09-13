@@ -5,6 +5,7 @@ env:
   global:
     - SFOS_VERSION=2.2.0.29
     - IMAGE=coderus/sailfishos-platform-sdk:${SFOS_VERSION}
+    - GO_IPFS_VERSION=dfd19c470e162ef906382683fd743a8571cede95
 
 services:
   - docker
@@ -29,7 +30,7 @@ before_install:
   - docker exec build-engine ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
 script:
-  - docker exec -e SFOS_VERSION=${SFOS_VERSION} -e TARGET=$TARGET -e ABI=$ABI build-engine bash -c "cd /home/nemo
+  - docker exec -e SFOS_VERSION=${SFOS_VERSION} -e TARGET=$TARGET -e ABI=$ABI -e GO_IPFS_VERSION=$GO_IPFS_VERSION build-engine bash -c "cd /home/nemo
     && cp -r libipfs-git libipfs
     && cd libipfs
     && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-${ABI}-as /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-${ABI}/4.8.3/as

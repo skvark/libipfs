@@ -20,6 +20,7 @@ Simple C wrapper for go-ipfs.
 %define _sfos_version %{getenv:SFOS_VERSION}
 %define _target %{getenv:TARGET}
 %define _abi %{getenv:ABI}
+%define _go_ipfs_version %{getenv:GO_IPFS_VERSION}
 
 %ifarch %ix86
 # 386 (a.k.a. x86 or x86-32)
@@ -48,6 +49,7 @@ ls $HOME/go1.11/bin
 go env
 go get -u -d github.com/ipfs/go-ipfs
 cd $HOME/go/src/github.com/ipfs/go-ipfs
+git checkout %{_go_ipfs_version}
 make deps
 
 cd $HOME/libipfs/src
