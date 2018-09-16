@@ -40,7 +40,9 @@ import (
 //    f_ipfs_unpin,
 //    f_ipfs_gc,
 //    f_ipfs_peers,
-//    f_ipfs_id
+//    f_ipfs_id,
+//    f_ipfs_repo_stats,
+//    f_ipfs_config
 //};
 //
 import "C"
@@ -423,89 +425,138 @@ func ipfs_peers(callback unsafe.Pointer) {
 
 //export ipfs_id
 func ipfs_id(id *C.char, callback unsafe.Pointer) {
+	go func() {
+		id_string := C.GoString(id)
+		nodeInfo := new(NodeInfo)
 
-	id_string := C.GoString(id)
-	nodeInfo := new(NodeInfo)
+		if len(id_string) == 0 {
+			nodeInfo.ID = api.node.Identity.Pretty()
 
-	if len(id_string) == 0 {
-		nodeInfo.ID = api.node.Identity.Pretty()
-
-		if api.node.PrivateKey == nil {
-			if err := api.node.LoadPrivateKey(); err != nil {
-				createErrorCallback(err, callback)
+			if api.node.PrivateKey == nil {
+				if err := api.node.LoadPrivateKey(); err != nil {
+					createErrorCallback(err, callback)
+				}
 			}
-		}
 
-		pk := api.node.PrivateKey.GetPublic()
-		pkb, err := ic.MarshalPublicKey(pk)
-
-		if err != nil {
-			createErrorCallback(err, callback)
-			return;
-		}
-
-		nodeInfo.PublicKey = base64.StdEncoding.EncodeToString(pkb)
-
-		if api.node.PeerHost != nil {
-			for _, a := range api.node.PeerHost.Addrs() {
-				s := a.String() + "/ipfs/" + nodeInfo.ID
-				nodeInfo.Addresses = append(nodeInfo.Addresses, s)
-			}
-		}
-
-		nodeInfo.ProtocolVersion = identify.LibP2PVersion
-		nodeInfo.AgentVersion = identify.ClientVersion
-
-	} else {
-
-		pid, err := peer.IDB58Decode(id_string)
-		if err != nil {
-			createErrorCallback(err, callback)
-			return;
-		}
-
-		p, err := api.node.Routing.FindPeer(api.ctx, pid)
-
-		if err != nil {
-			createErrorCallback(err, callback)
-			return;
-		}
-
-		if pk := api.node.Peerstore.PubKey(p.ID); pk != nil {
+			pk := api.node.PrivateKey.GetPublic()
 			pkb, err := ic.MarshalPublicKey(pk)
+
 			if err != nil {
 				createErrorCallback(err, callback)
 				return;
 			}
+
 			nodeInfo.PublicKey = base64.StdEncoding.EncodeToString(pkb)
-		}
 
-		for _, a := range api.node.Peerstore.Addrs(p.ID) {
-			nodeInfo.Addresses = append(nodeInfo.Addresses, a.String())
-		}
+			if api.node.PeerHost != nil {
+				for _, a := range api.node.PeerHost.Addrs() {
+					s := a.String() + "/ipfs/" + nodeInfo.ID
+					nodeInfo.Addresses = append(nodeInfo.Addresses, s)
+				}
+			}
 
-		if v, err := api.node.Peerstore.Get(p.ID, "ProtocolVersion"); err == nil {
-			if vs, ok := v.(string); ok {
-				nodeInfo.ProtocolVersion = vs
+			nodeInfo.ProtocolVersion = identify.LibP2PVersion
+			nodeInfo.AgentVersion = identify.ClientVersion
+
+		} else {
+
+			pid, err := peer.IDB58Decode(id_string)
+			if err != nil {
+				createErrorCallback(err, callback)
+				return;
+			}
+
+			p, err := api.node.Routing.FindPeer(api.ctx, pid)
+
+			if err != nil {
+				createErrorCallback(err, callback)
+				return;
+			}
+
+			if pk := api.node.Peerstore.PubKey(p.ID); pk != nil {
+				pkb, err := ic.MarshalPublicKey(pk)
+				if err != nil {
+					createErrorCallback(err, callback)
+					return;
+				}
+				nodeInfo.PublicKey = base64.StdEncoding.EncodeToString(pkb)
+			}
+
+			for _, a := range api.node.Peerstore.Addrs(p.ID) {
+				nodeInfo.Addresses = append(nodeInfo.Addresses, a.String())
+			}
+
+			if v, err := api.node.Peerstore.Get(p.ID, "ProtocolVersion"); err == nil {
+				if vs, ok := v.(string); ok {
+					nodeInfo.ProtocolVersion = vs
+				}
+			}
+
+			if v, err := api.node.Peerstore.Get(p.ID, "AgentVersion"); err == nil {
+				if vs, ok := v.(string); ok {
+					nodeInfo.AgentVersion = vs
+				}
 			}
 		}
 
-		if v, err := api.node.Peerstore.Get(p.ID, "AgentVersion"); err == nil {
-			if vs, ok := v.(string); ok {
-				nodeInfo.AgentVersion = vs
-			}
+		jsonStr, err := json.Marshal(nodeInfo)
+
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
 		}
-	}
 
-	jsonStr, err := json.Marshal(nodeInfo)
+		cdata := C.CBytes(jsonStr)
+		defer C.free(cdata)
 
-	if err != nil {
-		createErrorCallback(err, callback)
-		return;
-	}
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), C.f_ipfs_id, callback_class_instance)
+	}()
+}
 
-	cdata := C.CBytes(jsonStr)
-	defer C.free(cdata)
+//export ipfs_repo_stats
+func ipfs_repo_stats(callback unsafe.Pointer) {
+	go func() {
+		stat, err := corerepo.RepoStat(api.ctx, api.node)
 
-	C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), C.f_ipfs_id, callback_class_instance)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		jsonStr, err := json.Marshal(stat)
+
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		cdata := C.CBytes(jsonStr)
+		defer C.free(cdata)
+
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), C.f_ipfs_repo_stats, callback_class_instance)
+	}()
+}
+
+//export ipfs_config
+func ipfs_config(callback unsafe.Pointer) {
+	go func() {
+		cfg, err := api.node.Repo.Config()
+
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		jsonStr, err := json.Marshal(cfg)
+
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		cdata := C.CBytes(jsonStr)
+		defer C.free(cdata)
+
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), C.f_ipfs_config, callback_class_instance)
+	}()
 }

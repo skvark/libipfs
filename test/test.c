@@ -11,6 +11,8 @@ int _cat_done = -1;
 int _ls_done = -1;
 int _peers_done = -1;
 int _id_done = -1;
+int _stats_done = -1;
+int _config_done = -1;
 
 void file_added(char* error, char* data, size_t size, int f, void* instance) {
     if (data != NULL) {
@@ -92,6 +94,30 @@ void id_done(char* error, char* data, size_t size, int f, void* instance) {
     _id_done = 0;
 }
 
+void config_done(char* error, char* data, size_t size, int f, void* instance) {
+    if (data != NULL) {
+        fprintf(stdout, "config: %s\n", data);
+    }
+
+    if (error != NULL) {
+        fprintf(stderr, "error: %s\n", error);
+        _config_done = 1;
+    }
+    _config_done = 0;
+}
+
+void stats_done(char* error, char* data, size_t size, int f, void* instance) {
+    if (data != NULL) {
+        fprintf(stdout, "stats: %s\n", data);
+    }
+
+    if (error != NULL) {
+        fprintf(stderr, "error: %s\n", error);
+        _stats_done = 1;
+    }
+    _stats_done = 0;
+}
+
 int main(int argc, char **argv) {
     char *path, *err;
 
@@ -118,8 +144,10 @@ int main(int argc, char **argv) {
 
     ipfs_id(NULL, (void*)&id_done);
     ipfs_peers((void*)&peers_done);
+    ipfs_config((void*)&config_done);
+    ipfs_repo_stats((void*)&stats_done);
 
-    while(added == -1 || path_added == -1 || _peers_done == -1 || _id_done == -1) {};
+    while(added == -1 || path_added == -1 || _peers_done == -1 || _id_done == -1 || _config_done == -1 || _stats_done == -1) {};
 
     ipfs_cat((char*)cat_file, (void*)cat_done);
     ipfs_ls((char*)ls_path, (void*)ls_done);
