@@ -12,7 +12,7 @@ int _ls_done = -1;
 int _peers_done = -1;
 int _id_done = -1;
 
-void file_added(char* error, char* data, size_t size, void* instance) {
+void file_added(char* error, char* data, size_t size, int f, void* instance) {
     if (data != NULL) {
         fprintf(stdout, "hash: %s\n", data);
     }
@@ -23,7 +23,7 @@ void file_added(char* error, char* data, size_t size, void* instance) {
     added = 0;
 }
 
-void ls_done(char* error, char* data, size_t size, void* instance) {
+void ls_done(char* error, char* data, size_t size, int f, void* instance) {
     if (data != NULL) {
         fprintf(stdout, "ls: %s\n", data);
     }
@@ -34,7 +34,7 @@ void ls_done(char* error, char* data, size_t size, void* instance) {
     _ls_done = 0;
 }
 
-void file_path_added(char* error, char* data, size_t size, void* instance) {
+void file_path_added(char* error, char* data, size_t size, int f, void* instance) {
     if (data != NULL) {
         fprintf(stdout, "hash (msf root): %s\n", data);
     }
@@ -45,7 +45,7 @@ void file_path_added(char* error, char* data, size_t size, void* instance) {
     path_added = 0;
 }
 
-void cat_done(char* error, char* data, size_t size, void* instance) {
+void cat_done(char* error, char* data, size_t size, int f, void* instance) {
     if (data != NULL) {
         fprintf(stdout, "cat data: %s\n", data);
     }
@@ -56,7 +56,7 @@ void cat_done(char* error, char* data, size_t size, void* instance) {
     _cat_done = 0;
 }
 
-void unpin_done(char* error, char* data, size_t size, void* instance) {
+void unpin_done(char* error, char* data, size_t size, int f, void* instance) {
     if (data != NULL) {
         fprintf(stdout, "unpinned: %s\n", data);
     }
@@ -68,7 +68,7 @@ void unpin_done(char* error, char* data, size_t size, void* instance) {
     _unpin_done = 0;
 }
 
-void peers_done(char* error, char* data, size_t size, void* instance) {
+void peers_done(char* error, char* data, size_t size, int f, void* instance) {
     if (data != NULL) {
         fprintf(stdout, "peers: %s\n", data);
     }
@@ -80,7 +80,7 @@ void peers_done(char* error, char* data, size_t size, void* instance) {
     _peers_done = 0;
 }
 
-void id_done(char* error, char* data, size_t size, void* instance) {
+void id_done(char* error, char* data, size_t size, int f, void* instance) {
     if (data != NULL) {
         fprintf(stdout, "id: %s\n", data);
     }

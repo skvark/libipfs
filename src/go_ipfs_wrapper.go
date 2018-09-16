@@ -27,10 +27,22 @@ import (
 
 //#include <stdlib.h>
 //
-//static void callback(void* func, char* error, char* data, size_t size, void* instance)
+//static void callback(void* func, char* error, char* data, size_t size, int fid, void* instance)
 //{
-//    ((void(*)(char*, char*, size_t, void*)) func)(error, data, size, instance);
+//    ((void(*)(char*, char*, size_t, int, void*)) func)(error, data, size, fid, instance);
 //}
+//
+//enum functions {
+//    f_ipfs_add_bytes,
+//    f_ipfs_add_path_or_file,
+//    f_ipfs_ls,
+//    f_ipfs_cat,
+//    f_ipfs_unpin,
+//    f_ipfs_gc,
+//    f_ipfs_peers,
+//    f_ipfs_id
+//};
+//
 import "C"
 
 const (
@@ -112,7 +124,7 @@ func createErrorCallback(err error, callback unsafe.Pointer) {
 	cdata := C.CBytes(data)
 	defer C.free(cdata)
 
-	C.callback(callback, (*C.char)(cdata), nil, C.size_t(len(e)), callback_class_instance)
+	C.callback(callback, (*C.char)(cdata), nil, C.size_t(len(e)), -1, callback_class_instance)
 }
 
 //export ipfs_start
@@ -189,7 +201,7 @@ func ipfs_add_bytes(data unsafe.Pointer, size C.size_t, callback unsafe.Pointer)
 		cdata := C.CBytes(data)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(path)), callback_class_instance)
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(path)), C.f_ipfs_add_bytes, callback_class_instance)
 	}()
 }
 
@@ -266,7 +278,7 @@ func ipfs_add_path_or_file(path *C.char, callback unsafe.Pointer) {
 		cdata := C.CBytes(data)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(data)), callback_class_instance)
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(data)), C.f_ipfs_add_path_or_file, callback_class_instance)
 	}()
 }
 
@@ -309,7 +321,7 @@ func ipfs_ls(cid *C.char, callback unsafe.Pointer) {
 		cdata := C.CBytes(jsonStr)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), callback_class_instance)
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), C.f_ipfs_ls, callback_class_instance)
 	}()
 }
 
@@ -335,7 +347,7 @@ func ipfs_cat(cid *C.char, callback unsafe.Pointer) {
 		cdata := C.CBytes(bytes)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(bytes)), callback_class_instance)
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(bytes)), C.f_ipfs_cat, callback_class_instance)
 	}()
 }
 
@@ -361,7 +373,7 @@ func ipfs_unpin(cid *C.char, callback unsafe.Pointer) {
 		cdata := C.CBytes(data)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(cid_string)), callback_class_instance)
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(cid_string)), C.f_ipfs_unpin, callback_class_instance)
 	}()
 }
 
@@ -372,7 +384,7 @@ func ipfs_gc(callback unsafe.Pointer) {
 			createErrorCallback(err, callback)
 			return;
 		}
-		C.callback(callback, nil, nil, 0, callback_class_instance)
+		C.callback(callback, nil, nil, 0, C.f_ipfs_gc, callback_class_instance)
 	}()
 }
 
@@ -405,7 +417,7 @@ func ipfs_peers(callback unsafe.Pointer) {
 		cdata := C.CBytes(jsonStr)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), callback_class_instance)
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), C.f_ipfs_peers, callback_class_instance)
 	}()
 }
 
@@ -483,7 +495,6 @@ func ipfs_id(id *C.char, callback unsafe.Pointer) {
 				nodeInfo.AgentVersion = vs
 			}
 		}
-
 	}
 
 	jsonStr, err := json.Marshal(nodeInfo)
@@ -496,5 +507,5 @@ func ipfs_id(id *C.char, callback unsafe.Pointer) {
 	cdata := C.CBytes(jsonStr)
 	defer C.free(cdata)
 
-	C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), callback_class_instance)
+	C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), C.f_ipfs_id, callback_class_instance)
 }
