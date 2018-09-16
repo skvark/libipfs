@@ -27,9 +27,9 @@ import (
 
 //#include <stdlib.h>
 //
-//static void callback(void* func, char* error, char* data, size_t size)
+//static void callback(void* func, char* error, char* data, size_t size, void* instance)
 //{
-//    ((void(*)(char*, char*, size_t)) func)(error, data, size);
+//    ((void(*)(char*, char*, size_t, void*)) func)(error, data, size, instance);
 //}
 import "C"
 
@@ -65,7 +65,17 @@ type Api struct {
 
 var api *Api = nil
 
+// Given that this wrapper is used via C++ classes,
+// this variable holds the class instance pointer
+// to be used in the callback method of the class
+var callback_class_instance unsafe.Pointer = nil
+
 func main() { }
+
+//export register_callback_class_instance
+func register_callback_class_instance(instance unsafe.Pointer) {
+	callback_class_instance = instance
+}
 
 // see: https://github.com/ipfs/go-ipfs/blob/master/cmd/ipfs/init.go
 func checkRepo(repo_root string) error {
@@ -102,7 +112,7 @@ func createErrorCallback(err error, callback unsafe.Pointer) {
 	cdata := C.CBytes(data)
 	defer C.free(cdata)
 
-	C.callback(callback, (*C.char)(cdata), nil, C.size_t(len(e)))
+	C.callback(callback, (*C.char)(cdata), nil, C.size_t(len(e)), callback_class_instance)
 }
 
 //export ipfs_start
@@ -179,7 +189,7 @@ func ipfs_add_bytes(data unsafe.Pointer, size C.size_t, callback unsafe.Pointer)
 		cdata := C.CBytes(data)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(path)))
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(path)), callback_class_instance)
 	}()
 }
 
@@ -256,7 +266,7 @@ func ipfs_add_path_or_file(path *C.char, callback unsafe.Pointer) {
 		cdata := C.CBytes(data)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(data)))
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(data)), callback_class_instance)
 	}()
 }
 
@@ -299,7 +309,7 @@ func ipfs_ls(cid *C.char, callback unsafe.Pointer) {
 		cdata := C.CBytes(jsonStr)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)))
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), callback_class_instance)
 	}()
 }
 
@@ -325,7 +335,7 @@ func ipfs_cat(cid *C.char, callback unsafe.Pointer) {
 		cdata := C.CBytes(bytes)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(bytes)))
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(bytes)), callback_class_instance)
 	}()
 }
 
@@ -351,7 +361,7 @@ func ipfs_unpin(cid *C.char, callback unsafe.Pointer) {
 		cdata := C.CBytes(data)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(cid_string)))
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(cid_string)), callback_class_instance)
 	}()
 }
 
@@ -362,7 +372,7 @@ func ipfs_gc(callback unsafe.Pointer) {
 			createErrorCallback(err, callback)
 			return;
 		}
-		C.callback(callback, nil, nil, 0)
+		C.callback(callback, nil, nil, 0, callback_class_instance)
 	}()
 }
 
@@ -395,7 +405,7 @@ func ipfs_peers(callback unsafe.Pointer) {
 		cdata := C.CBytes(jsonStr)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)))
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), callback_class_instance)
 	}()
 }
 
@@ -486,5 +496,5 @@ func ipfs_id(id *C.char, callback unsafe.Pointer) {
 	cdata := C.CBytes(jsonStr)
 	defer C.free(cdata)
 
-	C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)))
+	C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), callback_class_instance)
 }
