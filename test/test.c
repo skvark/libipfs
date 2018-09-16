@@ -23,11 +23,9 @@ void file_added(char* error, char* data, size_t size) {
     added = 0;
 }
 
-void ls_done(char* error, char** data, size_t size) {
+void ls_done(char* error, char* data, size_t size) {
     if (data != NULL) {
-        for (int i = 0; i < size; ++i ) {
-          printf("ls: %s\n", *(data + i));
-        }
+        fprintf(stdout, "ls: %s\n", data);
     }
     if (error != NULL) {
         fprintf(stderr, "error: %s\n", error);
@@ -70,11 +68,9 @@ void unpin_done(char* error, char* data, size_t size) {
     _unpin_done = 0;
 }
 
-void peers_done(char* error, char** data, size_t size) {
+void peers_done(char* error, char* data, size_t size) {
     if (data != NULL) {
-        for (int i = 0; i < size; ++i ) {
-          printf("peers: %s\n", *(data + i));
-        }
+        fprintf(stdout, "peers: %s\n", data);
     }
 
     if (error != NULL) {

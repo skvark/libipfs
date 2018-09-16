@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"strings"
 	"os"
 	"io"
 	"io/ioutil"
@@ -32,11 +31,6 @@ import (
 //{
 //    ((void(*)(char*, char*, size_t)) func)(error, data, size);
 //}
-//
-//static void array_callback(void* func, char* error, char** data, size_t size)
-//{
-//    ((void(*)(char*, char**, size_t)) func)(error, data, size);
-//}
 import "C"
 
 const (
@@ -49,6 +43,16 @@ type NodeInfo struct {
     Addresses []string
     AgentVersion string
     ProtocolVersion string
+}
+
+type Peer struct {
+    Pid string
+    Addr string
+}
+
+type Dir struct {
+    Cid string
+    Name string
 }
 
 type Api struct {
@@ -274,23 +278,28 @@ func ipfs_ls(cid *C.char, callback unsafe.Pointer) {
 			return;
 		}
 
-		var b *C.char
-    	ptrSize := unsafe.Sizeof(b)
-		ptr := C.malloc(C.size_t(len(dir)) * C.size_t(ptrSize))
+		dirs := []Dir{}
 
-	    for i := 0; i < len(dir); i++ {
-	    	var str strings.Builder
-	    	str.WriteString(dir[i].Name)
-	    	str.WriteString("|")
-	    	str.WriteString(dir[i].Cid.String())
+		for _, d := range dir {
+			ds := Dir {
+				Cid: d.Cid.String(),
+				Name: d.Name,
+			}
 
-	        el := (**C.char)(unsafe.Pointer(uintptr(ptr) + uintptr(i)*ptrSize))
-	        *el = C.CString(str.String())
-	    }
+			dirs = append(dirs, ds)
+		}
 
-		defer C.free(ptr)
+		jsonStr, err := json.Marshal(dirs)
 
-		C.array_callback(callback, nil, (**C.char)(ptr), C.size_t(len(dir)))
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		cdata := C.CBytes(jsonStr)
+		defer C.free(cdata)
+
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)))
 	}()
 }
 
@@ -362,23 +371,31 @@ func ipfs_peers(callback unsafe.Pointer) {
 	go func() {
 		conns := api.node.PeerHost.Network().Conns()
 
-		var b *C.char
-    	ptrSize := unsafe.Sizeof(b)
-		ptr := C.malloc(C.size_t(len(conns)) * C.size_t(ptrSize))
+		peers := []Peer{}
 
-	    for i := 0; i < len(conns); i++ {
-	    	var str strings.Builder
-	    	str.WriteString(conns[i].RemotePeer().Pretty())
-	    	str.WriteString("|")
-	    	str.WriteString(conns[i].RemoteMultiaddr().String())
+		for _, c := range conns {
+			pid := c.RemotePeer()
+			addr := c.RemoteMultiaddr()
 
-	        el := (**C.char)(unsafe.Pointer(uintptr(ptr) + uintptr(i)*ptrSize))
-	        *el = C.CString(str.String())
-	    }
+			p := Peer {
+				Pid: pid.Pretty(),
+				Addr: addr.String(),
+			}
 
-		defer C.free(ptr)
+			peers = append(peers, p)
+		}
 
-		C.array_callback(callback, nil, (**C.char)(ptr), C.size_t(len(conns)))
+		jsonStr, err := json.Marshal(peers)
+
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		cdata := C.CBytes(jsonStr)
+		defer C.free(cdata)
+
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)))
 	}()
 }
 
