@@ -40,19 +40,19 @@ const (
 type NodeInfo struct {
 	ID string
 	PublicKey string
-    Addresses []string
-    AgentVersion string
-    ProtocolVersion string
+	Addresses []string
+	AgentVersion string
+	ProtocolVersion string
 }
 
 type Peer struct {
-    Pid string
-    Addr string
+	Pid string
+	Addr string
 }
 
 type Dir struct {
-    Cid string
-    Name string
+	Cid string
+	Name string
 }
 
 type Api struct {
