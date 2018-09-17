@@ -33,6 +33,7 @@ import (
 //}
 //
 //enum functions {
+//    f_ipfs_start,
 //    f_ipfs_add_bytes,
 //    f_ipfs_add_path_or_file,
 //    f_ipfs_ls,
@@ -130,55 +131,70 @@ func createErrorCallback(err error, callback unsafe.Pointer) {
 }
 
 //export ipfs_start
-func ipfs_start(repo_root *C.char) *C.char {
+func ipfs_start(repo_root *C.char, repo_max_size *C.char, callback unsafe.Pointer) {
 	var a Api
 	repoRoot := C.GoString(repo_root)
+	repoMaxSize := C.GoString(repo_max_size)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
 	a.ctx = ctx
 	a.cancel = cancel
 
-	if err := checkRepo(repoRoot); err != nil {
-		return C.CString(err.Error())
-	}
+	go func() {
 
-	var conf *config.Config
+		if err := checkRepo(repoRoot); err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
 
-	// check that there is no existing repo in the repoRoot
-	// create if no repo exists
-	if !fsrepo.IsInitialized(repoRoot) {
-		conf, err := config.Init(os.Stdout, nBitsForKeypair)
+		var conf *config.Config
+
+		// check that there is no existing repo in the repoRoot
+		// create if no repo exists
+		if !fsrepo.IsInitialized(repoRoot) {
+			conf, err := config.Init(os.Stdout, nBitsForKeypair)
+
+			if err != nil {
+				createErrorCallback(err, callback)
+				return;
+			}
+
+			conf.Datastore.StorageMax = repoMaxSize
+
+			if err := fsrepo.Init(repoRoot, conf); err != nil {
+				createErrorCallback(err, callback)
+				return;
+			}
+		}
+
+		// try to open the repo
+		repo, err := fsrepo.Open(repoRoot);
 
 		if err != nil {
-			return C.CString(err.Error())
+			createErrorCallback(err, callback)
+			return;
 		}
 
-		if err := fsrepo.Init(repoRoot, conf); err != nil {
-			return C.CString(err.Error())
+		node, err := core.NewNode(a.ctx, &core.BuildCfg{
+			Online: true,
+			Permanent: true,
+			Repo: repo,
+		})
+
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
 		}
-	}
 
-	// try to open the repo
-	repo, err := fsrepo.Open(repoRoot);
+		node.SetLocal(false)
+		a.api = coreapi.NewCoreAPI(node)
+		a.node = node
+		a.ipfsConfig = conf
+		api = &a
 
-	if err != nil {
-		return C.CString(err.Error())
-	}
-
-	node, err := core.NewNode(a.ctx, &core.BuildCfg{
-		Online: true,
-		Permanent: true,
-		Repo: repo,
-	})
-
-	node.SetLocal(false)
-	a.api = coreapi.NewCoreAPI(node)
-	a.node = node
-	a.ipfsConfig = conf
-	api = &a
-
-	return nil
+		C.callback(callback, nil, nil, 0, C.f_ipfs_start, callback_class_instance)
+	}()
 }
 
 //export ipfs_stop

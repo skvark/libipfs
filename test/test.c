@@ -13,6 +13,7 @@ int _peers_done = -1;
 int _id_done = -1;
 int _stats_done = -1;
 int _config_done = -1;
+int started = -1;
 
 void file_added(char* error, char* data, size_t size, int f, void* instance) {
     if (data != NULL) {
@@ -106,6 +107,14 @@ void config_done(char* error, char* data, size_t size, int f, void* instance) {
     _config_done = 0;
 }
 
+void start_done(char* error, char* data, size_t size, int f, void* instance) {
+    if (error != NULL) {
+        fprintf(stderr, "error: %s\n", error);
+        started = 1;
+    }
+    started = 0;
+}
+
 void stats_done(char* error, char* data, size_t size, int f, void* instance) {
     if (data != NULL) {
         fprintf(stdout, "stats: %s\n", data);
@@ -119,7 +128,7 @@ void stats_done(char* error, char* data, size_t size, int f, void* instance) {
 }
 
 int main(int argc, char **argv) {
-    char *path, *err;
+    char *path;
 
     if (argc < 2) {
         fprintf(stderr, "missing argument\n");
@@ -127,12 +136,11 @@ int main(int argc, char **argv) {
     }
 
     path = strdup(argv[1]);
-    err = ipfs_start(path);
+    char repo_max_size[] = "500MB";
 
-    if (err != NULL) {
-        fprintf(stderr, "error: %s\n", err);
-        return 1;
-    }
+    ipfs_start(path, (char*)repo_max_size, (void*)&start_done);
+
+    while(started == -1) {}
 
     char data[] = "content for ipfs wrapper test";
     char pathname[] = "test_folder";
