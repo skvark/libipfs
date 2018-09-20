@@ -2,7 +2,7 @@
 
 Work in Progress! More information and features will be added when the project proceeds further.
 
-Simple C wrapper for [go-ipfs](https://github.com/ipfs/go-ipfs).
+Simple cgo wrapper for [go-ipfs](https://github.com/ipfs/go-ipfs).
 
 ``go-ipfs`` is usually run as a daemon with e.g. ``ipfs daemon``. This is not possible in many systems (such as in Sailfish OS based mobile devices) which have more restricted environments and tighter rules for application deployment (no multiple executables allowed etc.).
 
@@ -24,15 +24,35 @@ While the primary target of this repository is Sailfish OS, the wrapper can be b
 2. Fetch [go-ipfs](https://github.com/ipfs/go-ipfs) sources according to the guide in the ``go-ipfs`` README and run ``make deps`` in the source folder.
 3. Run ``CGO_ENABLED=1 go build -o libipfs.so -buildmode=c-shared src/go_ipfs_wrapper.go``
 
-You might want to set GOOS and GOARCH environment variables if you are targeting some other OS and architecture than your host system (cross-compilation). However, this requires the target system toolchain (compilers, linkers etc.) to work properly. For example see the ``rpm/libipfs.spec`` file.
+You might want to set ``GOOS`` and ``GOARCH`` environment variables if you are targeting some other OS and architecture than your host system (cross-compilation). However, this requires the target system toolchain (compilers, linkers etc.) to work properly. For example see the ``rpm/libipfs.spec`` file.
 
 ## Documentation for go-ipfs Wrapper
 
-The wrapper code itself is in the ``src`` folder. It's just a very initial prototype, but it is able to spin up a full IPFS node, add content to the IPFS and shut down the node. The code utilizes callbacks in the case of long running tasks. These tasks are executed as ``goroutine``s.
+The wrapper code itself is in the ``src`` folder. The code utilizes callbacks in the case of long running tasks. These tasks are executed as ``goroutine``s.
 
-See the ``test`` folder for very basic ``C`` command line app example.
+The callbacks are "old style" ``C`` callbacks. This means that you can't use fancy new features such as ``std::bind`` or ``std::function`` when calling the exported functions from ``C++11`` and above. If you wish to bind the callbacks inside ``C++`` classes, you can pass a class instance pointer (or some other pointer) to the wrapper via ``register_callback_class_instance``.
 
-Further documentation will be written when the wrapper stabilizes. This depends partially from ``go-ipfs`` development since the ``go-ipfs`` internal coreapi is not very stable and is missing a lot of features.
+The library exports following functions:
+
+* ``ipfs_start``
+* ``ipfs_add_bytes``
+* ``ipfs_add_path_or_file``
+* ``ipfs_ls``
+* ``ipfs_cat``
+* ``ipfs_unpin``
+* ``ipfs_gc``
+* ``ipfs_peers``
+* ``ipfs_id``
+* ``ipfs_repo_stats``
+* ``ipfs_config``
+* ``ipfs_files_cp``
+* ``ipfs_files_ls``
+* ``ipfs_files_mkdir``
+* ``ipfs_files_stat``
+
+These functions mirror mostly the ``go-ipfs`` command line client methods. The callback will receive both error and possible return values as ``char*``. The return value is encoded as JSON if the function returns more complicated structures than for example single string. See the sources for parameters and the ``test`` folder for very basic ``C`` command line app example (which needs refactoring...).
+
+Further documentation will be written when the wrapper stabilizes. This depends partially from ``go-ipfs`` development since the ``go-ipfs`` internal coreapi is not very stable and is missing a lot of features. Therefore, many of the functions use internal stuff from ``go-ipfs`` and some functionality is heavily duplicated.
 
 ### Installation in Sailfish OS SDK
 
