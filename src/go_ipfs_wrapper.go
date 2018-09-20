@@ -11,12 +11,17 @@ import (
 	"unsafe"
 	"encoding/json"
 	"encoding/base64"
+	"strings"
+	gopath "path"
 	core "github.com/ipfs/go-ipfs/core"
 	coreapi "github.com/ipfs/go-ipfs/core/coreapi"
 	coreiface "github.com/ipfs/go-ipfs/core/coreapi/interface"
 	corerepo "github.com/ipfs/go-ipfs/core/corerepo"
 	coreunix "github.com/ipfs/go-ipfs/core/coreunix"
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
+	mfs "github.com/ipfs/go-ipfs/mfs"
+	ft "github.com/ipfs/go-ipfs/unixfs"
+	dag "github.com/ipfs/go-ipfs/merkledag"
 	identify "gx/ipfs/QmY51bqSM5XgxQZqsBrQcRkKTnCb8EKpJpR9K6Qax7Njco/go-libp2p/p2p/protocol/identify"
 	ic "gx/ipfs/Qme1knMqwt1hKZbc1BmQFmnm9f36nyQGwXxPGVpVJ9rMK5/go-libp2p-crypto"
 	"gx/ipfs/QmdVrMn1LhB4ybb8hMVaMLXnA8XRSewMnK6YqXKXoTcRvN/go-libp2p-peer"
@@ -43,7 +48,11 @@ import (
 //    f_ipfs_peers,
 //    f_ipfs_id,
 //    f_ipfs_repo_stats,
-//    f_ipfs_config
+//    f_ipfs_config,
+//    f_ipfs_files_cp,
+//    f_ipfs_files_ls,
+//    f_ipfs_files_mkdir,
+//    f_ipfs_files_stat
 //};
 //
 import "C"
@@ -118,6 +127,23 @@ func checkRepo(repo_root string) error {
 	}
 
 	return err
+}
+
+// see https://github.com/ipfs/go-ipfs/blob/v0.4.17/core/commands/files.go, not public func so can't reuse...
+func checkPath(p string) (string, error) {
+	if len(p) == 0 {
+		return "", fmt.Errorf("paths must not be empty")
+	}
+
+	if p[0] != '/' {
+		return "", fmt.Errorf("paths must start with a leading slash")
+	}
+
+	cleaned := gopath.Clean(p)
+	if p[len(p)-1] == '/' && p != "/" {
+		cleaned += "/"
+	}
+	return cleaned, nil
 }
 
 func createErrorCallback(err error, callback unsafe.Pointer) {
@@ -574,5 +600,254 @@ func ipfs_config(callback unsafe.Pointer) {
 		defer C.free(cdata)
 
 		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), C.f_ipfs_config, callback_class_instance)
+	}()
+}
+
+//export ipfs_files_cp
+func ipfs_files_cp(from *C.char, to *C.char, callback unsafe.Pointer) {
+	go func() {
+		source := C.GoString(from)
+		dest := C.GoString(to)
+
+		src, err := checkPath(source)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		src = strings.TrimRight(src, "/")
+
+		dst, err := checkPath(dest)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		if dst[len(dst)-1] == '/' {
+			dst += gopath.Base(src)
+		}
+
+		path, err := coreiface.ParsePath(src)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		nd, err := api.api.ResolveNode(api.ctx, path)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		err = mfs.PutNode(api.node.FilesRoot, dst, nd)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		err = mfs.FlushPath(api.node.FilesRoot, dst)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		C.callback(callback, nil, nil, 0, C.f_ipfs_files_cp, callback_class_instance)
+	}()
+}
+
+//export ipfs_files_ls
+func ipfs_files_ls(p *C.char, callback unsafe.Pointer) {
+	go func() {
+		gostr := C.GoString(p)
+
+		if len(gostr) == 0 {
+			gostr = "/"
+		}
+
+		path, err := checkPath(gostr)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		fsn, err := mfs.Lookup(api.node.FilesRoot, path)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		var fileNodes []mfs.NodeListing
+
+		switch fsn := fsn.(type) {
+
+		case *mfs.Directory:
+			var err error
+			fileNodes, err = fsn.List(api.ctx)
+			if err != nil {
+				createErrorCallback(err, callback)
+				return;
+			}
+
+		case *mfs.File:
+			_, name := gopath.Split(path)
+			fileNodes = []mfs.NodeListing{mfs.NodeListing{Name: name}}
+
+			fileNodes[0].Type = int(fsn.Type())
+
+			size, err := fsn.Size()
+			if err != nil {
+				createErrorCallback(err, callback)
+				return;
+			}
+
+			fileNodes[0].Size = size
+
+			nd, err := fsn.GetNode()
+			if err != nil {
+				createErrorCallback(err, callback)
+				return;
+			}
+
+			fileNodes[0].Hash = nd.Cid().String()
+
+		default:
+			createErrorCallback(fmt.Errorf("Could not determine node type."), callback)
+			return;
+		}
+
+		jsonStr, err := json.Marshal(fileNodes)
+
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		cdata := C.CBytes(jsonStr)
+		defer C.free(cdata)
+
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), C.f_ipfs_files_ls, callback_class_instance)
+	}()
+}
+
+//export ipfs_files_mkdir
+func ipfs_files_mkdir(p *C.char,parents bool, callback unsafe.Pointer) {
+	go func() {
+		gostr := C.GoString(p)
+
+		dir, err := checkPath(gostr)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		err = mfs.Mkdir(api.node.FilesRoot, dir, mfs.MkdirOpts{
+			Mkparents: parents,
+			Flush:     true,
+			Prefix:    nil,
+		})
+
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		C.callback(callback, nil, nil, 0, C.f_ipfs_files_mkdir, callback_class_instance)
+	}()
+}
+
+type statOutput struct {
+	Hash           string
+	Size           uint64
+	CumulativeSize uint64
+	Blocks         int
+	Type           string
+}
+
+//export ipfs_files_stat
+func ipfs_files_stat(p *C.char, callback unsafe.Pointer) {
+	go func() {
+		gostr := C.GoString(p)
+
+		path, err := checkPath(gostr)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		fsn, err := mfs.Lookup(api.node.FilesRoot, path)
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		nd, err := fsn.GetNode()
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		c := nd.Cid()
+
+		cumulsize, err := nd.Size()
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		var stat *statOutput
+
+		switch n := nd.(type) {
+
+		case *dag.ProtoNode:
+			d, err := ft.FromBytes(n.Data())
+			if err != nil {
+				createErrorCallback(err, callback)
+				return;
+			}
+
+			var ndtype string
+			switch d.GetType() {
+			case ft.TDirectory, ft.THAMTShard:
+				ndtype = "directory"
+			case ft.TFile, ft.TMetadata, ft.TRaw:
+				ndtype = "file"
+			default:
+				createErrorCallback(fmt.Errorf("Could not determine node type."), callback)
+				return
+			}
+
+			stat = &statOutput{
+				Hash:           c.String(),
+				Blocks:         len(nd.Links()),
+				Size:           d.GetFilesize(),
+				CumulativeSize: cumulsize,
+				Type:           ndtype,
+			}
+
+		case *dag.RawNode:
+			stat = &statOutput{
+				Hash:           c.String(),
+				Blocks:         0,
+				Size:           cumulsize,
+				CumulativeSize: cumulsize,
+				Type:           "file",
+			}
+
+		default:
+			createErrorCallback(fmt.Errorf("Could not determine node type."), callback)
+			return;
+		}
+
+		jsonStr, err := json.Marshal(stat)
+
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		cdata := C.CBytes(jsonStr)
+		defer C.free(cdata)
+
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), C.f_ipfs_files_stat, callback_class_instance)
 	}()
 }
