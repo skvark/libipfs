@@ -255,8 +255,8 @@ func ipfs_add_bytes(data unsafe.Pointer, size C.size_t, callback unsafe.Pointer)
 // - nocopy is not enabled because it's expiremental
 //export ipfs_add_path_or_file
 func ipfs_add_path_or_file(path *C.char, callback unsafe.Pointer) {
+	pathString := C.GoString(path)
 	go func() {
-		pathString := C.GoString(path)
 
 		// emulate command line args
 		var args []string
@@ -467,8 +467,8 @@ func ipfs_peers(callback unsafe.Pointer) {
 
 //export ipfs_id
 func ipfs_id(id *C.char, callback unsafe.Pointer) {
+	id_string := C.GoString(id)
 	go func() {
-		id_string := C.GoString(id)
 		nodeInfo := new(NodeInfo)
 
 		if len(id_string) == 0 {
@@ -605,10 +605,9 @@ func ipfs_config(callback unsafe.Pointer) {
 
 //export ipfs_files_cp
 func ipfs_files_cp(from *C.char, to *C.char, callback unsafe.Pointer) {
+	source := C.GoString(from)
+	dest := C.GoString(to)
 	go func() {
-		source := C.GoString(from)
-		dest := C.GoString(to)
-
 		src, err := checkPath(source)
 		if err != nil {
 			createErrorCallback(err, callback)
@@ -657,19 +656,19 @@ func ipfs_files_cp(from *C.char, to *C.char, callback unsafe.Pointer) {
 
 //export ipfs_files_ls
 func ipfs_files_ls(p *C.char, callback unsafe.Pointer) {
+	gostr := C.GoString(p)
+
+	if len(gostr) == 0 {
+		gostr = "/"
+	}
+
+	path, err := checkPath(gostr)
+	if err != nil {
+		createErrorCallback(err, callback)
+		return;
+	}
+
 	go func() {
-		gostr := C.GoString(p)
-
-		if len(gostr) == 0 {
-			gostr = "/"
-		}
-
-		path, err := checkPath(gostr)
-		if err != nil {
-			createErrorCallback(err, callback)
-			return;
-		}
-
 		fsn, err := mfs.Lookup(api.node.FilesRoot, path)
 		if err != nil {
 			createErrorCallback(err, callback)
@@ -730,16 +729,16 @@ func ipfs_files_ls(p *C.char, callback unsafe.Pointer) {
 }
 
 //export ipfs_files_mkdir
-func ipfs_files_mkdir(p *C.char,parents bool, callback unsafe.Pointer) {
+func ipfs_files_mkdir(p *C.char, parents bool, callback unsafe.Pointer) {
+	gostr := C.GoString(p)
+
+	dir, err := checkPath(gostr)
+	if err != nil {
+		createErrorCallback(err, callback)
+		return;
+	}
+
 	go func() {
-		gostr := C.GoString(p)
-
-		dir, err := checkPath(gostr)
-		if err != nil {
-			createErrorCallback(err, callback)
-			return;
-		}
-
 		err = mfs.Mkdir(api.node.FilesRoot, dir, mfs.MkdirOpts{
 			Mkparents: parents,
 			Flush:     true,
@@ -765,14 +764,15 @@ type statOutput struct {
 
 //export ipfs_files_stat
 func ipfs_files_stat(p *C.char, callback unsafe.Pointer) {
-	go func() {
-		gostr := C.GoString(p)
+	gostr := C.GoString(p)
 
-		path, err := checkPath(gostr)
-		if err != nil {
-			createErrorCallback(err, callback)
-			return;
-		}
+	path, err := checkPath(gostr)
+	if err != nil {
+		createErrorCallback(err, callback)
+		return;
+	}
+
+	go func() {
 
 		fsn, err := mfs.Lookup(api.node.FilesRoot, path)
 		if err != nil {
