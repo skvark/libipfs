@@ -95,7 +95,6 @@ type statOutput struct {
 type Api struct {
 	api coreiface.CoreAPI
 	node *core.IpfsNode
-	ipfsConfig *config.Config
 	ctx context.Context
 	cancel context.CancelFunc
 }
@@ -170,7 +169,7 @@ func createErrorCallback(err error, callback unsafe.Pointer) {
 }
 
 //export ipfs_start
-func ipfs_start(repo_root *C.char, repo_max_size *C.char, callback unsafe.Pointer) {
+func ipfs_start(repo_root *C.char, repo_max_size *C.char, dhtclientonly bool, callback unsafe.Pointer) {
 	var a Api
 	repoRoot := C.GoString(repo_root)
 	repoMaxSize := C.GoString(repo_max_size)
@@ -215,11 +214,19 @@ func ipfs_start(repo_root *C.char, repo_max_size *C.char, callback unsafe.Pointe
 			return;
 		}
 
-		node, err := core.NewNode(a.ctx, &core.BuildCfg{
+		nodeConfig := &core.BuildCfg{
 			Online: true,
 			Permanent: true,
 			Repo: repo,
-		})
+		}
+
+		if dhtclientonly == true {
+			nodeConfig.Routing = core.DHTClientOption
+		} else {
+			nodeConfig.Routing = core.DHTOption
+		}
+
+		node, err := core.NewNode(a.ctx, nodeConfig)
 
 		if err != nil {
 			createErrorCallback(err, callback)
@@ -229,7 +236,6 @@ func ipfs_start(repo_root *C.char, repo_max_size *C.char, callback unsafe.Pointe
 		node.SetLocal(false)
 		a.api = coreapi.NewCoreAPI(node)
 		a.node = node
-		a.ipfsConfig = conf
 		api = &a
 
 		C.callback(callback, nil, nil, 0, C.f_ipfs_start, callback_class_instance)
