@@ -199,7 +199,11 @@ func ipfs_start(repo_root *C.char, repo_max_size *C.char, dhtmode *C.char, callb
 				return;
 			}
 
-			conf.Datastore.StorageMax = repoMaxSize
+			if len(repoMaxSize) != 0 {
+				conf.Datastore.StorageMax = repoMaxSize
+			} else {
+				conf.Datastore.StorageMax = "500MB"
+			}
 
 			if err := fsrepo.Init(repoRoot, conf); err != nil {
 				createErrorCallback(err, callback)
@@ -220,7 +224,9 @@ func ipfs_start(repo_root *C.char, repo_max_size *C.char, dhtmode *C.char, callb
 			return;
 		}
 
-		conf.Datastore.StorageMax = repoMaxSize
+		if len(repoMaxSize) != 0 {
+			conf.Datastore.StorageMax = repoMaxSize
+		}
 
 		if len(dhtRouting) != 0 {
 			conf.Routing.Type = dhtRouting
