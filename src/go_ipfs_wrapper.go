@@ -187,6 +187,8 @@ func ipfs_start(repo_root *C.char, repo_max_size *C.char, dhtmode *C.char, callb
 			return;
 		}
 
+		var conf *config.Config
+
 		// check that there is no existing repo in the repoRoot
 		// create if no repo exists
 		if !fsrepo.IsInitialized(repoRoot) {
@@ -207,7 +209,24 @@ func ipfs_start(repo_root *C.char, repo_max_size *C.char, dhtmode *C.char, callb
 
 		// try to open the repo
 		repo, err := fsrepo.Open(repoRoot);
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
 
+		conf, err = repo.Config();
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		conf.Datastore.StorageMax = repoMaxSize
+
+		if len(dhtRouting) != 0 {
+			conf.Routing.Type = dhtRouting
+		}
+
+		err = repo.SetConfig(conf)
 		if err != nil {
 			createErrorCallback(err, callback)
 			return;
@@ -219,16 +238,7 @@ func ipfs_start(repo_root *C.char, repo_max_size *C.char, dhtmode *C.char, callb
 			Repo: repo,
 		}
 
-		if len(dhtRouting) == 0 {
-			cfg, err := repo.Config()
-			if err != nil {
-				createErrorCallback(err, callback)
-				return;
-			}
-			dhtRouting = cfg.Routing.Type
-		}
-
-		if dhtRouting == "dhtclient" {
+		if conf.Routing.Type == "dhtclient" {
 			nodeConfig.Routing = core.DHTClientOption
 		} else {
 			nodeConfig.Routing = core.DHTOption

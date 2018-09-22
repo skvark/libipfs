@@ -189,8 +189,9 @@ int main(int argc, char **argv) {
 
     path = strdup(argv[1]);
     char repo_max_size[] = "500MB";
+    char mode[] = "dht";
 
-    ipfs_start(path, (char*)repo_max_size, (void*)&start_done);
+    ipfs_start(path, (char*)repo_max_size, (char*)mode, (void*)&start_done);
 
     while(started == -1) {}
 
@@ -203,7 +204,7 @@ int main(int argc, char **argv) {
     char ls_path[] = "QmU1BMQS1hPgLziefeC2tWm3STK3hL8nMrDCX27VcwKuDm";
 
     ipfs_add_bytes((void*)data, sizeof(data), (void*)&file_added);
-    ipfs_add_path_or_file((char*)pathname, (void*)&file_path_added);
+    ipfs_add_path_or_file((char*)pathname, 0, (void*)&file_path_added);
 
     ipfs_id(NULL, (void*)&id_done);
     ipfs_peers((void*)&peers_done);
