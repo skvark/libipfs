@@ -169,10 +169,11 @@ func createErrorCallback(err error, callback unsafe.Pointer) {
 }
 
 //export ipfs_start
-func ipfs_start(repo_root *C.char, repo_max_size *C.char, dhtclientonly bool, callback unsafe.Pointer) {
+func ipfs_start(repo_root *C.char, repo_max_size *C.char, dhtmode *C.char, callback unsafe.Pointer) {
 	var a Api
 	repoRoot := C.GoString(repo_root)
 	repoMaxSize := C.GoString(repo_max_size)
+	dhtRouting := C.GoString(dhtmode)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -185,8 +186,6 @@ func ipfs_start(repo_root *C.char, repo_max_size *C.char, dhtclientonly bool, ca
 			createErrorCallback(err, callback)
 			return;
 		}
-
-		var conf *config.Config
 
 		// check that there is no existing repo in the repoRoot
 		// create if no repo exists
@@ -220,7 +219,16 @@ func ipfs_start(repo_root *C.char, repo_max_size *C.char, dhtclientonly bool, ca
 			Repo: repo,
 		}
 
-		if dhtclientonly == true {
+		if len(dhtRouting) == 0 {
+			cfg, err := repo.Config()
+			if err != nil {
+				createErrorCallback(err, callback)
+				return;
+			}
+			dhtRouting = cfg.Routing.Type
+		}
+
+		if dhtRouting == "dhtclient" {
 			nodeConfig.Routing = core.DHTClientOption
 		} else {
 			nodeConfig.Routing = core.DHTOption
