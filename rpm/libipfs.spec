@@ -1,5 +1,5 @@
 Name:           libipfs
-Version:        0.9.0
+Version:        0.10.0
 Release:        0
 Summary:        C wrapper for go-ipfs
 License:        MIT
