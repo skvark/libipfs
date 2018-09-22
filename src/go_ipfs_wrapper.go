@@ -79,6 +79,19 @@ type Dir struct {
 	Name string
 }
 
+type AddReturnValue struct {
+	Cid string
+	Path string
+}
+
+type statOutput struct {
+	Hash           string
+	Size           uint64
+	CumulativeSize uint64
+	Blocks         int
+	Type           string
+}
+
 type Api struct {
 	api coreiface.CoreAPI
 	node *core.IpfsNode
@@ -250,25 +263,23 @@ func ipfs_add_bytes(data unsafe.Pointer, size C.size_t, callback unsafe.Pointer)
 }
 
 // - go-ipfs coreapi does not support adding by path yet so this method is implemented via other internal apis
-// - all files / directories are wrapped to container folder to preserve filenames
+// - to wrap files into container object, set wrapped true
 // - if a directory is given, files are added recursively
 // - nocopy is not enabled because it's expiremental
 //export ipfs_add_path_or_file
-func ipfs_add_path_or_file(path *C.char, callback unsafe.Pointer) {
+func ipfs_add_path_or_file(path *C.char, wrapped bool, callback unsafe.Pointer) {
 	pathString := C.GoString(path)
-	go func() {
 
+	go func() {
 		// emulate command line args
 		var args []string
 		args = append(args, "add")
 
 		if info, err := os.Stat(pathString); err == nil && info.IsDir() {
 			args = append(args, "-r")
-			args = append(args, pathString)
-		} else {
-			args = append(args, pathString)
-			args =append(args, "-w")
 		}
+
+		args = append(args, pathString)
 
 		// parse args to get Request object
 		req, err := cli.Parse(api.ctx, args, nil, commands.Root)
@@ -286,7 +297,7 @@ func ipfs_add_path_or_file(path *C.char, callback unsafe.Pointer) {
 		}
 
 		fileAdder.Out = outChan
-		fileAdder.Wrap = true
+		fileAdder.Wrap = wrapped
 
 		for {
 			file, err := req.Files.NextFile()
@@ -318,11 +329,19 @@ func ipfs_add_path_or_file(path *C.char, callback unsafe.Pointer) {
 
 		defer close(outChan)
 
-		data := []byte(nd.String())
-		cdata := C.CBytes(data)
+		info := AddReturnValue{Cid: nd.String(), Path: pathString}
+
+		jsonStr, err := json.Marshal(info)
+
+		if err != nil {
+			createErrorCallback(err, callback)
+			return;
+		}
+
+		cdata := C.CBytes(jsonStr)
 		defer C.free(cdata)
 
-		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(data)), C.f_ipfs_add_path_or_file, callback_class_instance)
+		C.callback(callback, nil, (*C.char)(cdata), C.size_t(len(jsonStr)), C.f_ipfs_add_path_or_file, callback_class_instance)
 	}()
 }
 
@@ -752,14 +771,6 @@ func ipfs_files_mkdir(p *C.char, parents bool, callback unsafe.Pointer) {
 
 		C.callback(callback, nil, nil, 0, C.f_ipfs_files_mkdir, callback_class_instance)
 	}()
-}
-
-type statOutput struct {
-	Hash           string
-	Size           uint64
-	CumulativeSize uint64
-	Blocks         int
-	Type           string
 }
 
 //export ipfs_files_stat
