@@ -3,7 +3,7 @@ language: generic
 
 env:
   global:
-    - SFOS_VERSION=2.2.0.29
+    - SFOS_VERSION=3.3.0.14 
     - IMAGE=coderus/sailfishos-platform-sdk:${SFOS_VERSION}
 
 services:
