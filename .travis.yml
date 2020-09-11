@@ -32,8 +32,8 @@ script:
   - docker exec -e SFOS_VERSION=${SFOS_VERSION} -e TARGET=$TARGET -e ABI=$ABI -e GO_IPFS_VERSION=$GO_IPFS_VERSION build-engine bash -c "cd /home/nemo
     && cp -r libipfs-git libipfs
     && cd libipfs
-    && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-${ABI}-as /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-${ABI}/4.8.3/as
-    && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-${ABI}-ld /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-${ABI}/4.8.3/ld
+    && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-${ABI}-as /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-${ABI}/8.3.0/as
+    && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-${ABI}-ld /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-${ABI}/8.3.0/ld
     && mb2 -t SailfishOS-${SFOS_VERSION}-${TARGET} build
     && sudo cp RPMS/*.rpm /home/nemo/libipfs-git/"
 
