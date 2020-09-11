@@ -36,7 +36,7 @@ Simple C wrapper for go-ipfs.
 %build
 
 cd $HOME
-mkdir go1.11
+mkdir go1.15.2
 curl -O -L https://golang.org/dl/go1.15.2.linux-386.tar.gz
 tar -xzf go1.15.2.linux-386.tar.gz --strip-components=1 -C go1.15.2
 
