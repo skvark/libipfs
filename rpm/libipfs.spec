@@ -37,7 +37,7 @@ Simple C wrapper for go-ipfs.
 
 cd $HOME
 mkdir go1.11
-curl -O https://golang.org/dl/go1.15.2.linux-386.tar.gz
+curl -O -L https://golang.org/dl/go1.15.2.linux-386.tar.gz
 tar -xzf go1.15.2.linux-386.tar.gz --strip-components=1 -C go1.15.2
 
 export GOROOT=$HOME/go1.15.2
