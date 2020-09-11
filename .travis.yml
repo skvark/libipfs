@@ -34,6 +34,8 @@ script:
     && cd libipfs
     && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-${ABI}-as /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-${ABI}/8.3.0/as
     && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-${ABI}-ld /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-${ABI}/8.3.0/ld
+    && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-${ABI}-ld.gold /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-${ABI}/8.3.0/ld.gold
+    && sudo ln -s /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/bin/${TARGET}-meego-linux-${ABI}-ld.bfd /srv/mer/toolings/SailfishOS-${SFOS_VERSION}/opt/cross/libexec/gcc/${TARGET}-meego-linux-${ABI}/8.3.0/ld.bfd
     && mb2 -t SailfishOS-${SFOS_VERSION}-${TARGET} build
     && sudo cp RPMS/*.rpm /home/nemo/libipfs-git/"
 

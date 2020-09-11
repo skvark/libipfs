@@ -41,7 +41,6 @@ tar -xzf go1.15.2.linux-386.tar.gz --strip-components=1 -C go1.15.2
 
 export GOROOT=$HOME/go1.15.2
 export PATH=$PATH:$GOROOT/bin
-export PATH=$PATH:/srv/mer/toolings/SailfishOS-%{_sfos_version}/opt/cross/libexec/gcc/%{_target}-meego-linux-gnueabi/8.3.0/
 
 cd $HOME/libipfs
 
