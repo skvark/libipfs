@@ -5,7 +5,6 @@ env:
   global:
     - SFOS_VERSION=2.2.0.29
     - IMAGE=coderus/sailfishos-platform-sdk:${SFOS_VERSION}
-    - GO_IPFS_VERSION=dfd19c470e162ef906382683fd743a8571cede95
 
 services:
   - docker
